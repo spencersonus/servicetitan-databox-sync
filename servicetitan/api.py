@@ -2,7 +2,6 @@ import os
 import requests
 from datetime import datetime, timedelta, timezone
 
-# IMPORTANT: Use Partner APIs host for telephony
 BASE_URL = "https://partnerapis.servicetitan.io"
 
 
@@ -17,13 +16,15 @@ def fetch_calls(access_token: str) -> list[dict]:
 
     headers = {
         "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
     }
 
-    # Pull today + yesterday in UTC to avoid partial-day issues
+    # Pull today + yesterday in UTC
     to_utc = datetime.now(timezone.utc)
     from_utc = to_utc - timedelta(days=2)
 
-    url = f"{BASE_URL}/telephony/v2/tenant/{tenant_id}/calls"
+    # IMPORTANT: /calls/search (not just /calls)
+    url = f"{BASE_URL}/telephony/v2/tenant/{tenant_id}/calls/search"
 
     params = {
         "fromUtc": from_utc.isoformat(),
