@@ -2,7 +2,8 @@ import os
 import requests
 from datetime import datetime, timedelta, timezone
 
-BASE_URL = "https://api.servicetitan.io"
+# IMPORTANT: Use Partner APIs host for telephony
+BASE_URL = "https://partnerapis.servicetitan.io"
 
 
 def fetch_calls(access_token: str) -> list[dict]:
