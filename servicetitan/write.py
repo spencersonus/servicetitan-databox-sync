@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 
-def write_calls_to_excel(rows: list[dict], filename: str = "servicetitan_kpis.xlsx") -> None:
+def write_to_excel(rows: list[dict], filename: str = "servicetitan_kpis.xlsx") -> None:
     """Write aggregated call data to an Excel file.
 
     Args:
