@@ -1,7 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
 
-
 def aggregate_calls(calls: list[dict]) -> list[dict]:
     bucket = defaultdict(lambda: {
         "inbound_calls": 0,
@@ -10,22 +9,27 @@ def aggregate_calls(calls: list[dict]) -> list[dict]:
     })
 
     for call in calls:
-        # Only consider inbound calls
-        if call.get("direction") != "Inbound":
-            continue
-        ts_str = call.get("startedOn")
+        # ServiceTitan uses startUtc
+        ts_str = call.get("startUtc")
         if not ts_str:
             continue
+
         try:
             ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
         except ValueError:
             continue
-        csr_name = call.get("answeredBy", {}).get("name") or "Unknown"
+
+        csr_name = call.get("answeredBy", {}).get("name") or "Unanswered"
         key = (ts.date().isoformat(), ts.hour, csr_name)
+
         bucket[key]["inbound_calls"] += 1
-        if call.get("wasAnswered"):
+
+        # answeredBy presence indicates answered
+        if call.get("answeredBy"):
             bucket[key]["answered_calls"] += 1
-        if call.get("booking", {}).get("jobId"):
+
+        # jobId presence indicates booking
+        if call.get("jobId"):
             bucket[key]["booked_calls"] += 1
 
     rows = []
@@ -38,5 +42,6 @@ def aggregate_calls(calls: list[dict]) -> list[dict]:
             "answered_calls": counts["answered_calls"],
             "booked_calls": counts["booked_calls"],
         })
+
     rows.sort(key=lambda r: (r["date"], r["hour"], r["csr_name"]))
     return rows
